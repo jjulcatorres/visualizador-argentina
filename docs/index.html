@@ -1,0 +1,672 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Proyectos y solicitudes mineras para extraer cobre en Argentina</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #111;
+      overflow: hidden;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+      min-height: 720px;
+    }
+
+    .titulo-mapa {
+      position: absolute;
+      top: 22px;
+      right: 18px;
+      z-index: 1000;
+      max-width: 560px;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 18px 22px;
+      border-radius: 4px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.35);
+    }
+
+    .titulo-mapa h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      line-height: 1.15;
+      color: #111;
+    }
+
+    .titulo-mapa p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+      color: #444;
+    }
+
+    .panel-capas {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      z-index: 1000;
+      width: 440px;
+      max-height: calc(100vh - 36px);
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 4px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.38);
+      color: #222;
+    }
+
+    .panel-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(255,255,255,0.88);
+      padding: 18px 20px 14px 20px;
+      border-bottom: 1px solid rgba(216,216,216,0.75);
+}
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .panel-header p {
+      margin: 7px 0 0 0;
+      font-size: 15px;
+      color: #555;
+      line-height: 1.35;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .panel-actions button {
+      border: 1px solid #bdbdbd;
+      background: #f7f7f7;
+      color: #222;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .panel-actions button:hover {
+      background: #eaeaea;
+    }
+
+    .grupo {
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .grupo-btn {
+      width: 100%;
+      border: 0;
+      background: rgba(255,255,255,0.55);
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      font-size: 17px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .grupo-btn:hover {
+      background: #f3f3f3;
+    }
+
+    .grupo-btn span.contador {
+      font-size: 14px;
+      color: #666;
+      font-weight: 400;
+      margin-left: 8px;
+    }
+
+    .grupo-flecha {
+      font-size: 12px;
+      color: #555;
+      margin-left: 8px;
+    }
+
+    .grupo-contenido {
+      display: none;
+      padding: 0 18px 14px 18px;
+      background: rgba(255,255,255,0.45);
+    }
+
+    .grupo.abierto .grupo-contenido {
+      display: block;
+    }
+
+    .capa-item {
+      display: grid;
+      grid-template-columns: 24px 20px 1fr;
+      column-gap: 10px;
+      align-items: start;
+      padding: 8px 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .capa-item input {
+      margin: 2px 0 0 0;
+      cursor: pointer;
+    }
+
+    .capa-item label {
+      cursor: pointer;
+      color: #333;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      margin-top: 1px;
+      border: 1px solid rgba(0,0,0,0.3);
+    }
+
+    .estado {
+      display: none;
+    }
+
+    .minimap-container {
+      position: absolute;
+      right: 18px;
+      bottom: 24px;
+      width: 300px;
+      height: 210px;
+      z-index: 1000;
+      background: #fff;
+      border: 2px solid rgba(255,255,255,0.95);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.38);
+    }
+
+    #minimap {
+      width: 100%;
+      height: 100%;
+    }
+
+    .leaflet-popup-content {
+      min-width: 230px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 10px;
+    }
+
+    @media (max-width: 850px) {
+      #map {
+        height: 100dvh;
+        min-height: 100dvh;
+      }
+
+      .titulo-mapa {
+        display: none;
+      }
+
+      .panel-capas {
+        width: calc(100% - 28px);
+        left: 14px;
+        right: 14px;
+        top: 14px;
+        max-height: 42vh;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.90);
+      }
+
+      .panel-header {
+        padding: 12px 14px 9px 14px;
+      }
+
+      .panel-header h2 {
+        font-size: 20px;
+      }
+
+      .panel-header p {
+        font-size: 13px;
+        line-height: 1.3;
+      }
+
+      .panel-actions {
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .panel-actions button {
+        font-size: 13px;
+        padding: 7px 9px;
+      }
+
+      .grupo-btn {
+        padding: 12px 14px;
+        font-size: 16px;
+      }
+
+      .grupo-btn span.contador {
+        font-size: 13px;
+      }
+
+      .grupo-flecha {
+        font-size: 13px;
+      }
+
+      .grupo-contenido {
+        padding: 0 14px 10px 14px;
+      }
+
+      .capa-item {
+        grid-template-columns: 22px 18px 1fr;
+        column-gap: 8px;
+        padding: 7px 0;
+        font-size: 15px;
+        line-height: 1.3;
+      }
+
+      .swatch {
+        width: 16px;
+        height: 16px;
+      }
+
+      .leaflet-popup-content {
+        max-width: 270px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .leaflet-popup-content-wrapper {
+        border-radius: 10px;
+      }
+
+      .estado {
+        display: none;
+      }
+
+      .minimap-container {
+        display: none;
+      }
+
+      .leaflet-control-zoom {
+        margin-bottom: 18px !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <section class="titulo-mapa">
+    <h1>Proyectos y solicitudes mineras para extraer cobre en Argentina</h1>
+    <p>
+      Consulta la ubicación de los títulos y solicitudes mineras para extraer cobre, su estado y si se superponen con comunidades indígenas, áreas protegidas y/o glaciares.
+    </p>
+  </section>
+
+  <aside class="panel-capas">
+    <div class="panel-header">
+      <h2>Capas</h2>
+      <p>Activa o desactiva las capas. Los datos se cargan solo cuando se seleccionan.</p>
+
+      <div class="panel-actions">
+        <button id="btn-limpiar">Limpiar capas</button>
+        <button id="btn-argentina">Volver a Argentina</button>
+      </div>
+    </div>
+
+    <div id="layers-panel"></div>
+  </aside>
+
+  <div class="estado" id="estado">
+    Visualizador listo. Selecciona una capa.
+  </div>
+
+  <div class="minimap-container">
+    <div id="minimap"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const vistaArgentina = {
+      center: [-37.8, -64.5],
+      zoom: 7
+    };
+
+    const map = L.map("map", {
+      zoomControl: false,
+      scrollWheelZoom: true
+    }).setView(vistaArgentina.center, vistaArgentina.zoom);
+
+    L.control.zoom({
+      position: "bottomleft"
+    }).addTo(map);
+
+    const esriWorldImagery = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        maxZoom: 18,
+        attribution: "Tiles &copy; Esri, Maxar, Earthstar Geographics"
+      }
+    ).addTo(map);
+
+    const esriLabels = L.tileLayer(
+      "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+      {
+        maxZoom: 18,
+        attribution: "Labels &copy; Esri"
+      }
+    ).addTo(map);
+
+    const miniMap = L.map("minimap", {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      tap: false
+    });
+
+    miniMap.setView([-34.5, -63.5], 3);
+
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+      {
+        subdomains: "abcd",
+        maxZoom: 10
+      }
+    ).addTo(miniMap);
+
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+      {
+        subdomains: "abcd",
+        maxZoom: 10
+      }
+    ).addTo(miniMap);
+
+    let minimapRect = L.rectangle(map.getBounds(), {
+      color: "#f2c94c",
+      weight: 3,
+      fillOpacity: 0
+    }).addTo(miniMap);
+
+    function actualizarMinimap() {
+      minimapRect.setBounds(map.getBounds());
+    }
+
+    map.on("moveend zoomend", actualizarMinimap);
+
+    const estado = document.getElementById("estado");
+    const panel = document.getElementById("layers-panel");
+    const btnLimpiar = document.getElementById("btn-limpiar");
+    const btnArgentina = document.getElementById("btn-argentina");
+
+    const capasGeoJson = {};
+    const checkboxes = {};
+    const configCapas = {};
+
+    function setEstado(texto) {
+      estado.textContent = texto;
+    }
+
+    function normalizarTexto(texto) {
+      if (!texto) return "";
+      return texto
+        .replaceAll("_", " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function estiloCapa(estilo) {
+      return {
+        color: estilo.color,
+        weight: estilo.weight,
+        fillColor: estilo.fillColor,
+        fillOpacity: estilo.fillOpacity
+      };
+    }
+
+    function popupContenido(feature) {
+      const p = feature.properties || {};
+      const nombre = p.nombre || "Sin nombre";
+
+      const camposOcultos = new Set(["nombre", "grupo", "capa"]);
+
+      let html = `
+        <div style="text-align:center; font-weight:700; margin-bottom:10px; font-size:16px;">
+          ${normalizarTexto(nombre)}
+        </div>
+      `;
+
+      Object.keys(p).forEach(function(key) {
+        if (camposOcultos.has(key)) {
+          return;
+        }
+
+        const valor = p[key];
+
+        if (
+          valor === null ||
+          valor === undefined ||
+          String(valor).trim() === "" ||
+          String(valor).toLowerCase() === "null" ||
+          String(valor).toLowerCase() === "nan"
+        ) {
+          return;
+        }
+
+        html += `<br><span><b>${normalizarTexto(key)}:</b> ${normalizarTexto(valor)}</span>`;
+      });
+
+      return html;
+    }
+
+    function crearCapaGeoJson(data, capaConfig) {
+      return L.geoJSON(data, {
+        style: estiloCapa(capaConfig.estilo),
+
+        pointToLayer: function(feature, latlng) {
+          return L.circleMarker(latlng, {
+            radius: 6,
+            color: capaConfig.estilo.color,
+            weight: capaConfig.estilo.weight,
+            fillColor: capaConfig.estilo.fillColor,
+            fillOpacity: capaConfig.estilo.fillOpacity
+          });
+        },
+
+        onEachFeature: function(feature, layer) {
+          layer.bindPopup(popupContenido(feature));
+        }
+      });
+    }
+
+    async function cargarCapa(capaConfig) {
+      if (capasGeoJson[capaConfig.id]) {
+        return capasGeoJson[capaConfig.id];
+      }
+
+      setEstado(`Cargando: ${normalizarTexto(capaConfig.nombre)}...`);
+
+      const response = await fetch(capaConfig.archivo + "?v=argentina_restaurada_02", {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(`No se pudo cargar ${capaConfig.archivo}`);
+      }
+
+      const data = await response.json();
+      const layer = crearCapaGeoJson(data, capaConfig);
+
+      capasGeoJson[capaConfig.id] = layer;
+
+      setEstado(`Capa cargada: ${normalizarTexto(capaConfig.nombre)}`);
+
+      return layer;
+    }
+
+    async function activarCapa(capaConfig, checkbox) {
+  try {
+    const layer = await cargarCapa(capaConfig);
+    layer.addTo(map);
+
+    // No se aplica fitBounds para mantener la ubicación y zoom actual del usuario
+    setEstado(`Activa: ${normalizarTexto(capaConfig.nombre)}`);
+  } catch (error) {
+    console.error(error);
+    checkbox.checked = false;
+    setEstado(`Error al cargar: ${normalizarTexto(capaConfig.nombre)}`);
+  }
+}
+
+    function desactivarCapa(capaConfig) {
+      const layer = capasGeoJson[capaConfig.id];
+
+      if (layer && map.hasLayer(layer)) {
+        map.removeLayer(layer);
+      }
+
+      setEstado(`Desactivada: ${normalizarTexto(capaConfig.nombre)}`);
+    }
+
+    function crearPanelCapas(config) {
+      config.forEach((grupo, index) => {
+        const grupoDiv = document.createElement("div");
+        grupoDiv.className = "grupo";
+        if (index === 0) grupoDiv.classList.add("abierto");
+
+        const btn = document.createElement("button");
+        btn.className = "grupo-btn";
+
+        const titulo = document.createElement("span");
+        titulo.innerHTML = `${grupo.grupo} <span class="contador">(${grupo.capas.length})</span>`;
+
+        const flecha = document.createElement("span");
+        flecha.className = "grupo-flecha";
+        flecha.textContent = index === 0 ? "▲" : "▼";
+
+        btn.appendChild(titulo);
+        btn.appendChild(flecha);
+
+        const contenido = document.createElement("div");
+        contenido.className = "grupo-contenido";
+
+        btn.addEventListener("click", function() {
+          grupoDiv.classList.toggle("abierto");
+          flecha.textContent = grupoDiv.classList.contains("abierto") ? "▲" : "▼";
+        });
+
+        grupo.capas.forEach(capa => {
+          configCapas[capa.id] = capa;
+
+          const item = document.createElement("div");
+          item.className = "capa-item";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = `check-${capa.id}`;
+          checkbox.checked = capa.visible === true;
+
+          checkboxes[capa.id] = checkbox;
+
+          const swatch = document.createElement("span");
+          swatch.className = "swatch";
+          swatch.style.background = capa.estilo.fillColor;
+
+          const label = document.createElement("label");
+          label.htmlFor = checkbox.id;
+          label.textContent = normalizarTexto(capa.nombre);
+
+          checkbox.addEventListener("change", async function() {
+            if (checkbox.checked) {
+              await activarCapa(capa, checkbox);
+            } else {
+              desactivarCapa(capa);
+            }
+          });
+
+          item.appendChild(checkbox);
+          item.appendChild(swatch);
+          item.appendChild(label);
+          contenido.appendChild(item);
+        });
+
+        grupoDiv.appendChild(btn);
+        grupoDiv.appendChild(contenido);
+        panel.appendChild(grupoDiv);
+      });
+    }
+
+    function limpiarCapas() {
+      Object.keys(capasGeoJson).forEach(id => {
+        const layer = capasGeoJson[id];
+        if (layer && map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      });
+
+      Object.keys(checkboxes).forEach(id => {
+        checkboxes[id].checked = false;
+      });
+
+      setEstado("Capas desactivadas.");
+    }
+
+    btnLimpiar.addEventListener("click", limpiarCapas);
+
+    btnArgentina.addEventListener("click", function() {
+      map.setView(vistaArgentina.center, vistaArgentina.zoom);
+      actualizarMinimap();
+      setEstado("Vista general de Argentina.");
+    });
+
+    async function iniciar() {
+      try {
+        const response = await fetch("layers_config.json?v=argentina_restaurada_02", {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo cargar layers_config.json");
+        }
+
+        const config = await response.json();
+
+        crearPanelCapas(config);
+
+        setEstado("Visualizador listo. Selecciona una capa.");
+      } catch (error) {
+        console.error(error);
+        setEstado("Error al iniciar el visualizador.");
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

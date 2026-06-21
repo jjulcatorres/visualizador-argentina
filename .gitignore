@@ -1,0 +1,5 @@
+﻿data_procesada/
+web/
+.ipynb_checkpoints/
+*.gpkg
+*.zip
