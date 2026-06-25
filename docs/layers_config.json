@@ -4,7 +4,7 @@
     "capas": [
       {
         "id": "concesiones_extra_arg",
-        "nombre": "Títulos y solicitudes",
+        "nombre": "Proyectos mineros de cobre",
         "archivo": "data/concesiones_extra_arg.geojson",
         "visible": false,
         "estilo": {
@@ -40,7 +40,7 @@
       },
       {
         "id": "glaciares",
-        "nombre": "Glaciares",
+        "nombre": "Zonas glaciales y periglaciales",
         "archivo": "data/glaciares.geojson",
         "visible": false,
         "estilo": {

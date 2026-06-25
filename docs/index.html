@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Proyectos y solicitudes mineras para extraer cobre en Argentina</title>
+  <title>Proyectos mineros para la extracción de cobre en Argentina</title>
 
   <link
     rel="stylesheet"
@@ -318,9 +318,9 @@
   <div id="map"></div>
 
   <section class="titulo-mapa">
-    <h1>Proyectos y solicitudes mineras para extraer cobre en Argentina</h1>
+    <h1>Proyectos mineros para la extracción de cobre en Argentina</h1>
     <p>
-      Consulta la ubicación de los títulos y solicitudes mineras para extraer cobre, su estado y si se superponen con comunidades indígenas, áreas protegidas y/o glaciares.
+      Consulta la ubicación de las iniciativas mineras que buscan extraer cobre en el país, su etapa de avance y si se superponen con comunidades indígenas, áreas protegidas y/o geoformas glaciales.
     </p>
   </section>
 
@@ -350,8 +350,8 @@
 
   <script>
     const vistaArgentina = {
-      center: [-37.8, -64.5],
-      zoom: 7
+      center: [-30.8, -66.8],
+      zoom: 5
     };
 
     const map = L.map("map", {
@@ -512,7 +512,7 @@
 
       setEstado(`Cargando: ${normalizarTexto(capaConfig.nombre)}...`);
 
-      const response = await fetch(capaConfig.archivo + "?v=argentina_restaurada_02", {
+      const response = await fetch(capaConfig.archivo + "?v=argentina_actualizacion_01", {
         cache: "no-store"
       });
 
@@ -647,7 +647,7 @@
 
     async function iniciar() {
       try {
-        const response = await fetch("layers_config.json?v=argentina_restaurada_02", {
+        const response = await fetch("layers_config.json?v=argentina_actualizacion_01", {
           cache: "no-store"
         });
 
