@@ -34,23 +34,23 @@
       top: 22px;
       right: 18px;
       z-index: 1000;
-      max-width: 560px;
+      max-width: 160px;
       background: rgba(255, 255, 255, 0.92);
-      padding: 18px 22px;
+      padding: 14px 16px;
       border-radius: 4px;
       box-shadow: 0 3px 14px rgba(0,0,0,0.35);
     }
 
     .titulo-mapa h1 {
       margin: 0 0 8px 0;
-      font-size: 30px;
+      font-size: 24px;
       line-height: 1.15;
       color: #111;
     }
 
     .titulo-mapa p {
       margin: 0;
-      font-size: 16px;
+      font-size: 13.5px;
       line-height: 1.35;
       color: #444;
     }
@@ -60,7 +60,7 @@
       top: 18px;
       left: 18px;
       z-index: 1000;
-      width: 440px;
+      width: 380px;
       max-height: calc(100vh - 36px);
       overflow-y: auto;
       background: rgba(255, 255, 255, 0.88);
@@ -80,13 +80,13 @@
 
     .panel-header h2 {
       margin: 0;
-      font-size: 24px;
+      font-size: 21px;
       line-height: 1.2;
     }
 
     .panel-header p {
       margin: 7px 0 0 0;
-      font-size: 15px;
+      font-size: 13px;
       color: #555;
       line-height: 1.35;
     }
@@ -125,7 +125,7 @@
       justify-content: space-between;
       align-items: center;
       text-align: left;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 700;
       color: #222;
     }
@@ -193,8 +193,8 @@
       position: absolute;
       right: 18px;
       bottom: 24px;
-      width: 300px;
-      height: 210px;
+      width: 245px;
+      height: 170px;
       z-index: 1000;
       background: #fff;
       border: 2px solid rgba(255,255,255,0.95);
@@ -350,8 +350,8 @@
 
   <script>
     const vistaArgentina = {
-      center: [-30.8, -66.8],
-      zoom: 5
+      center: [-37.8, -64.5],
+      zoom: 7
     };
 
     const map = L.map("map", {
@@ -512,7 +512,7 @@
 
       setEstado(`Cargando: ${normalizarTexto(capaConfig.nombre)}...`);
 
-      const response = await fetch(capaConfig.archivo + "?v=argentina_actualizacion_01", {
+      const response = await fetch(capaConfig.archivo + "?v=argentina_restaurada_02", {
         cache: "no-store"
       });
 
@@ -647,7 +647,7 @@
 
     async function iniciar() {
       try {
-        const response = await fetch("layers_config.json?v=argentina_actualizacion_01", {
+        const response = await fetch("layers_config.json?v=argentina_restaurada_02", {
           cache: "no-store"
         });
 
